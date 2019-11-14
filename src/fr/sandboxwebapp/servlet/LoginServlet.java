@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.sql.Connection;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
-import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
@@ -36,7 +35,7 @@ public class LoginServlet extends Servlet {
 		else {
 			req.setAttribute ("errorConnection", false);
 			session.setAttribute ("userSession", user);
-			req.getRequestDispatcher ("/WEB-INF/pages/restreint/home.jsp").forward (req, resp);
+			resp.sendRedirect ("player");
 		}
 	}
 	

@@ -15,9 +15,9 @@ public abstract class Servlet extends HttpServlet {
 		LOG = Logger.getLogger (this.getClass ().getName ());
 	}
 
-	protected void showListWarnings (List<String> errors) {
-		for (String err : errors) {
-			LOG.warn (err);
+	protected void showListWarnings (List<Exception> errors) {
+		for (Exception e : errors) {
+			LOG.warn (e);
 		}
 	}
 	

@@ -13,6 +13,9 @@
 				height: 100%;
 				overflow: auto;
 			}
+			*::-webkit-scrollbar-track {
+				border-left: 1px solid #ddd;
+			}
 			.table-wrapper-scroll-y {
 				display: block;
 			}
@@ -33,7 +36,7 @@
 	        <div class="container-fluid">
 	            <div class="collapse navbar-collapse d-flex justify-content-between" id="navcol-1" style="padding:10px;">
 	                <button class="btn btn-dark" type="button" onclick="window.location.href='player'" style="background-color:rgba(255,255,255,0);">Player</button>
-	                <button class="btn btn-dark" type="button" onclick="window.location.href=''">Log out</button>
+	                <button class="btn btn-dark" type="button" onclick="window.location.href='logout'">Log out</button>
                 </div>
 	        </div>
 	    </nav>
@@ -59,13 +62,12 @@
 	            </div>
 	        </div>
 	    </div>
-  		<script src="/SandboxWebApp/inc/js/jquery.min.js"></script>
-  		<script src="/SandboxWebApp/inc/js/bootstrap.min.js"></script>
     	<script type="text/javascript">
   			window.onload = function () {
 
   				"use strict";
   				
+  				const audioContext = new (window.AudioContext || window.webkitAudioContext) ();
   				let uploading = false;
   				const listOfTracks = [];
   				const dropbox = document.getElementById ("dropbox");
@@ -136,38 +138,43 @@
   				
   			    function uploadFile (track) {
   					return new Promise ((resolve, reject) => {
-  	  					const form = new FormData ();
-  	  					form.append ("file", track);
-  	  					form.append ("title", track.name);
-  	  					const xhr = new XMLHttpRequest ();
-  	  					xhr.upload.addEventListener ("load", () => {
-  	  						console.log ("load");
-  	  						progressBarContainer.style.visibility = "hidden";
-  	  					    progressBar.style.width = "0%";
-  	  						setTimeout (() => resolve (), 800);
-  	  					});
-  	  					xhr.upload.addEventListener ("error", () => {
-  	  						console.log ("error");
-  	  						progressBar.className = "progress-bar bg-danger";
-  	  						setTimeout (() => {
-  	  							progressBarContainer.style.visibility = "hidden";
-  	  						    progressBar.style.width = "0%";
-  	  						    setTimeout (() => reject (), 800);
-  	  						}, 1000);
-  	  					});
-  	  					xhr.upload.addEventListener ("progress", e => {
-  	  						const percent = (e.loaded / e.total * 100);
-  	  						console.log (percent);
-  	  						progressBar.style.width = percent + "%";
-  	  						progressBar.setAttribute ("aria-valuenow", percent);
-  	  					});
-  	  					xhr.upload.addEventListener ("loadstart", () => {
-  	  				 	    console.log ("load start");
-  	  						progressBar.className = "progress-bar";
-  	  						progressBarContainer.style.visibility = "visible";
-  	  					});
-  	  					xhr.open ("POST", "upload", true);
-  	  					xhr.send (form);
+	  					const reader = new FileReader ();
+  	  					reader.onload = (e) => {
+  	  						audioContext.decodeAudioData (e.target.result).then (buffer => {
+	  	  						const form = new FormData ();
+	  		  					form.append ("file", track);
+	  		  					form.append ("duration", buffer.duration);
+	  		  					const xhr = new XMLHttpRequest ();
+	  		  					xhr.upload.addEventListener ("load", () => {
+	  		  						console.log ("load");
+	  		  						progressBarContainer.style.visibility = "hidden";
+	  		  					    progressBar.style.width = "0%";
+	  		  						resolve ();
+	  		  					});
+	  		  					xhr.upload.addEventListener ("error", () => {
+	  		  						console.log ("error");
+	  		  						progressBar.className = "progress-bar bg-danger";
+	  		  						setTimeout (() => {
+	  		  							progressBarContainer.style.visibility = "hidden";
+	  		  						    progressBar.style.width = "0%";
+	  		  						    reject ();
+	  		  						}, 1000);
+	  		  					});
+	  		  					xhr.upload.addEventListener ("progress", e => {
+	  		  						const percent = (e.loaded / e.total * 100);
+	  		  						progressBar.style.width = percent + "%";
+	  		  						progressBar.setAttribute ("aria-valuenow", percent);
+	  		  					});
+	  		  					xhr.upload.addEventListener ("loadstart", () => {
+	  		  				 	    console.log ("load start");
+	  		  						progressBar.className = "progress-bar";
+	  		  						progressBarContainer.style.visibility = "visible";
+	  		  					});
+	  		  					xhr.open ("POST", "upload", true);
+	  		  					xhr.send (form);
+  	  						});
+  	  					}
+  	  					reader.readAsArrayBuffer (track);
   					});
   				}
   				

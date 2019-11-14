@@ -2,18 +2,14 @@ package fr.sandboxwebapp.services;
 
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 import fr.sandboxwebapp.beans.User;
+import fr.sandboxwebapp.utils.Utils;
 
 public class ConnectionService extends Service {
-
-	private Connection con;
 	
 	public ConnectionService(Connection con) {
-		super ();
-		this.con = con;
+		super (con);
 	}
 	
 	public User connecting (HttpServletRequest req) {
@@ -35,12 +31,8 @@ public class ConnectionService extends Service {
 			}
 			return user;
 		}
-		catch (SQLException e) {
-			System.err.println ("Error about data base : " + e.getMessage ());
-			return null;
-		}
 		catch (Exception e) {
-			errors.add (e.getMessage ());
+			errors.add (e);
 			return null;
 		}
 	}
@@ -69,22 +61,19 @@ public class ConnectionService extends Service {
 				throw new Exception ("Le mot de passe n'est pas le même");
 			}
 			if (User.userExist (con, username)) {
-				throw new Exception ("Un utilisateur existe déja avec ce speudo");
+				throw new Exception ("Un utilisateur existe déja avec ce pseudo");
 			}
 			User user = new User ();
 			user.setFirstname (firstname);
 			user.setLastname (lastname);
 			user.setUsername (username);
+			user.setPassword (Utils.md5 (password));
 			user.setEmail (email);
-			User.create (con, password, user);
+			User.save (con, user);
 			return user;
 		}
-		catch (SQLException e) {
-			System.err.println ("Error about data base : " + e.getMessage ());
-			return null;
-		}
 		catch (Exception e) {
-			errors.add (e.getMessage ());
+			errors.add (e);
 			return null;
 		}
 	}

@@ -17,13 +17,6 @@
     	<filter-name>Set Character Encoding</filter-name>
     	<url-pattern>/*</url-pattern>
   	</filter-mapping>
-  	<!-- 
- 	<multipart-config>
-  		<max-file-size>262144000</max-file-size>
-  		<max-request-size>262144000</max-request-size>
-  		<file-size-threshold>0</file-size-threshold>
-  	</multipart-config>
-  	-->
   	<listener>
   		<listener-class>
   		fr.sandboxwebapp.context.WebappContextListener
@@ -37,7 +30,6 @@
   	<servlet-mapping>
   		<servlet-name>Login</servlet-name>
   		<url-pattern>/login</url-pattern>
-  		<!-- <url-pattern>/</url-pattern> -->
   	</servlet-mapping>
   
   	<servlet>
@@ -65,6 +57,29 @@
   	<servlet-mapping>
   		<servlet-name>AudioPlayerServlet</servlet-name>
   		<url-pattern>/player/*</url-pattern>
+  	</servlet-mapping>
+  	
+  	<servlet>
+  		<servlet-name>LogoutServlet</servlet-name>
+  		<servlet-class>fr.sandboxwebapp.servlet.LogoutServlet</servlet-class>
+  	</servlet>
+  	<servlet-mapping>
+  		<servlet-name>LogoutServlet</servlet-name>
+  		<url-pattern>/logout</url-pattern>
+  	</servlet-mapping>
+  
+  	<servlet>
+  		<servlet-name>test</servlet-name>
+  		<servlet-class>fr.sandboxwebapp.servlet.Test</servlet-class>
+  		<multipart-config>
+  			<max-file-size>10485760</max-file-size> <!-- 10 Mo -->
+			<max-request-size>52428800</max-request-size> <!-- 5 x 10 Mo -->
+			<file-size-threshold>1048576</file-size-threshold> <!-- 1 Mo -->
+  		</multipart-config>
+  	</servlet>
+  	<servlet-mapping>
+  		<servlet-name>test</servlet-name>
+  		<url-pattern>/test</url-pattern>
   	</servlet-mapping>
   
   	<filter>

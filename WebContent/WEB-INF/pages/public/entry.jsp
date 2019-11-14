@@ -25,13 +25,11 @@
 			</form>
 			<br>
 			<% if ((boolean) request.getAttribute ("errorConnection")) {
-			      for (String msg : (List<String>) request.getAttribute ("errors")) {
-			    	  out.println (String.format ("<p class=\"text-danger\">%s</p>", msg));
+			      for (Exception e : (List<Exception>) request.getAttribute ("errors")) {
+			    	  out.println (String.format ("<p class=\"text-danger\">%s</p>", e.getMessage ()));
 			      }
 			   }
 			%>
 		</div>
-  		<script src="/SandboxWebApp/inc/js/jquery.min.js"></script>
-  		<script src="/SandboxWebApp/inc/js/bootstrap.min.js"></script>
 	</body>
 </html>

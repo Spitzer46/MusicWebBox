@@ -1,5 +1,6 @@
 package fr.sandboxwebapp.beans;
 
+import java.security.NoSuchAlgorithmException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -9,6 +10,7 @@ import fr.sandboxwebapp.utils.Utils;
 public class User {
 
 	private String username;
+	private String password;
 	private String firstname;
 	private String lastname;
 	private String email;
@@ -17,55 +19,55 @@ public class User {
 	
 	public User () {}
 	
-	public static User getUser (Connection con, String username, String password) throws SQLException {
-		String query = "SELECT * FROM users WHERE username = ? AND hashPassword = ?";
+	public static User getUser (Connection con, String username, String password) throws SQLException, NoSuchAlgorithmException {
+		String query = "SELECT * FROM users WHERE username = ? AND password = ?";
+		User user = null;
 		PreparedStatement stmt = con.prepareStatement (query);
 		stmt.setString (1, username);
 		stmt.setString (2, Utils.md5 (password));
 		ResultSet results = stmt.executeQuery ();
 		if (results.next ()) {
-			User user = new User ();
+			user = new User ();
 			user.setUsername (username);
+			user.setPassword (results.getString ("password"));
 			user.setFirstname (results.getString ("firstname"));
 			user.setLastname (results.getString ("lastname"));
 			user.setEmail (results.getString ("email"));
-			return user;
 		}
-		else return null;
+		results.close ();
+		stmt.close ();
+		return user;
 	}
 	
 	public static boolean userExist (Connection con, String username) throws SQLException {
-		String query = "SELECT * FROM users WHERE username = ?";
+		String query = "SELECT id FROM users WHERE username = ?";
 		PreparedStatement stmt = con.prepareStatement (query);
 		stmt.setString (1, username);
 		ResultSet results = stmt.executeQuery ();
+		boolean exist = false;
 		if (results.next ()) {
-			return true;
+			exist = true;
 		}
-		return false;
+		results.close ();
+		stmt.close ();
+		return exist;
 	}
 	
 	public static void save (Connection con, User user) throws SQLException {
-		String query = "UPDATE users"
-			+ " SET username = ?, firstname = ?, lastname = ?, email = ?"
-			+ " WHERE id = ?";
+		String query = "INSERT INTO users (username, password, firstname, lastname, email) ";
+		query += "VALUES (?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE ";
+		query += "username = VALUES(username), ";
+		query += "firstname = VALUES(firstname), ";
+		query += "lastname = VALUES(lastname), ";
+		query += "email = VALUES(email)";
 		PreparedStatement stmt = con.prepareStatement (query);
 		stmt.setString (1, user.getUsername ());
-		stmt.setString (2, user.getFirstname ());
-		stmt.setString (3, user.getLastname ());
-		stmt.setString (4, user.getEmail ());
-		stmt.executeUpdate ();
-	}
-	
-	public static void create (Connection con, String password, User user) throws SQLException {
-		String query = "INSERT INTO users VALUES (DEFAULT, ?, ?, ?, ?, ?)";
-		PreparedStatement stmt = con.prepareStatement (query);
-		stmt.setString (1, user.getUsername ());
-		stmt.setString (2, Utils.md5 (password));
+		stmt.setString (2, user.getPassword ());
 		stmt.setString (3, user.getFirstname ());
 		stmt.setString (4, user.getLastname ());
 		stmt.setString (5, user.getEmail ());
 		stmt.executeUpdate ();
+		stmt.close ();
 	}
 
 	public String getUsername () {
@@ -76,6 +78,14 @@ public class User {
 		this.username = username;
 	}
 	
+	public String getPassword () {
+		return password;
+	}
+
+	public void setPassword (String password) {
+		this.password = password;
+	}
+
 	public String getFirstname () {
 		return firstname;
 	}

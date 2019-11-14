@@ -1,13 +1,20 @@
 package fr.sandboxwebapp.services;
 
+import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.List;
 
 public abstract class Service {
 
-	protected List<String> errors;
+	protected List<Exception> errors;
+	protected Connection con;
 	
-	protected Service () {
+	public Service () {
+		errors = new ArrayList<>();
+	}
+	
+	public Service (Connection con) {
+		this.con = con;
 		errors = new ArrayList<>();
 	}
 	
@@ -15,7 +22,7 @@ public abstract class Service {
 		return !errors.isEmpty ();
 	}
 	
-	public List<String> getErrors () {
+	public List<Exception> getErrors () {
 		return errors;
 	}
 	

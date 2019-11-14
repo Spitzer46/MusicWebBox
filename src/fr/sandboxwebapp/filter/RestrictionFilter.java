@@ -10,32 +10,38 @@ import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
+import org.apache.log4j.Logger;
+
 public class RestrictionFilter implements Filter {
 
+	private Logger LOG = null;
+	
 	@Override
 	public void doFilter (ServletRequest req, ServletResponse resp, FilterChain chain) throws IOException, ServletException {
         HttpServletRequest request = (HttpServletRequest) req;
         // not filtering static resource (all things into WEB-INF/inc folder)
         String localPath = request.getRequestURI ().substring (request.getContextPath ().length ());
         if (localPath.startsWith ("/inc")) {
-        	System.out.println ("Static ressource : " + localPath);
+        	LOG.info ("Static ressource : " + localPath);
         	chain.doFilter (req, resp);
         	return;
         }
         // filtering all other resource
         HttpSession session = request.getSession ();
         if (session.getAttribute ("userSession") == null) {
-        	System.out.println ("Public access : " + localPath);
+        	LOG.info ("Public access : " + localPath);
         	request.getRequestDispatcher (localPath).forward (req, resp);
         }
         else {
-        	System.out.println ("Private access : " + localPath);
+        	LOG.info ("Private access : " + localPath);
         	chain.doFilter (req, resp);
         }
 	}
 
 	@Override
-	public void init (FilterConfig conf) throws ServletException {}
+	public void init (FilterConfig conf) {
+		LOG = Logger.getLogger (this.getClass ().getName ());
+	}
 	
 	@Override
 	public void destroy () {}

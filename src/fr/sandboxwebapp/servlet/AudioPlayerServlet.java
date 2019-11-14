@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.sql.Connection;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
-import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
@@ -30,21 +29,19 @@ public class AudioPlayerServlet extends RestrictedServlet {
 		AudioPlayerService audioPlayerService = new AudioPlayerService ((Connection) context.getAttribute ("con"));
 		if (uri.equals ("/SandboxWebApp/player/api/nexttracks")) {
 			audioPlayerService.nextTrack (req, resp, user);
-			if (audioPlayerService.hasErrors ()) {
-				showListWarnings (audioPlayerService.getErrors ());
-			}
 		}
 		else if (uri.equals ("/SandboxWebApp/player/api/loadtrack")) {
 			audioPlayerService.loadTrack (req, resp, user);
-			if (audioPlayerService.hasErrors ()) {
-				showListWarnings (audioPlayerService.getErrors ());
-			}
 		}
 		else if (uri.equals ("/SandboxWebApp/player/api/readChunk")) {
-			
+			audioPlayerService.loadChunk (req, resp, user);
 		}
 		else {
 			LOG.warn ("Url not found");
+		}
+		// handler errors
+		if (audioPlayerService.hasErrors ()) {
+			showListWarnings (audioPlayerService.getErrors ());
 		}
 	}
 	

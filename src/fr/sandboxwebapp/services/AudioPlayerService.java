@@ -6,23 +6,21 @@ import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
 import fr.sandboxwebapp.beans.Track;
 import fr.sandboxwebapp.beans.User;
 
 public class AudioPlayerService extends Service {
-
-	private Connection con;
 	
 	public AudioPlayerService (Connection con) {
-		super ();
-		this.con = con;
+		super (con);
 	}
 	
 	public void nextTrack (HttpServletRequest req, HttpServletResponse resp, User user) {
 		try (ServletOutputStream sos = resp.getOutputStream ()) {
 			final int startId = Integer.parseInt ((String) req.getParameter ("start"));
 			if (startId < 0) {
-				throw new Exception ("StartId must not be lass than zero");
+				throw new Exception ("StartId must not be less than zero");
 			}
 			final int limit = Integer.parseInt ((String) req.getParameter ("limit"));
 			if (limit <= 0) {
@@ -36,7 +34,7 @@ public class AudioPlayerService extends Service {
 			sos.print (jsonTracks.toJSONString ());
 		}
 		catch (Exception e) {
-			errors.add (e.toString ());
+			errors.add (e);
 		}
 	}
 	
@@ -48,10 +46,26 @@ public class AudioPlayerService extends Service {
 				throw new Exception ("Track with this id was no found");
 			}
 			user.setLastTrack (lastTrack);
-			sos.print (lastTrack.getDataIn ().available ());
+			JSONObject infos = new JSONObject ();
+			infos.put ("duration", lastTrack.getDuration ());
+			// infos.put ("size", lastTrack.getDataIn ().available ());
+			sos.print (infos.toJSONString ());
 		}
 		catch (Exception e) {
-			errors.add (e.toString ());
+			errors.add (e);
+		}
+	}
+	
+	public void loadChunk (HttpServletRequest req, HttpServletResponse resp, User user) {
+		try (ServletOutputStream sos = resp.getOutputStream ()) {
+			Track track = user.getLastTrack ();
+			byte [] chunk = track.getNextChunk ();
+			if (chunk != null) {
+				sos.write (chunk);
+			}
+		}
+		catch (Exception e) {
+			errors.add (e);
 		}
 	}
 	

@@ -1,23 +1,27 @@
 package fr.sandboxwebapp.utils;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.InputStream;
 import java.math.BigInteger;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
+import org.apache.commons.io.IOUtils;
+
 public class Utils {
 	
-	public static String md5 (String input) {
-		String md5 = null;
-		if(null == input) return null;
-		try {		
-			MessageDigest digest = MessageDigest.getInstance ("MD5");
-			digest.update(input.getBytes (), 0, input.length ());
-			md5 = new BigInteger(1, digest.digest ()).toString (16);
-		} 
-		catch (NoSuchAlgorithmException e) {
-			System.err.println (e.toString ());
+	public static String md5 (String input) throws NoSuchAlgorithmException {
+		if(null == input) {
+			return null;	
 		}
-		return md5;
+		MessageDigest digest = MessageDigest.getInstance ("MD5");
+		digest.update(input.getBytes (), 0, input.length ());
+		return new BigInteger(1, digest.digest ()).toString (16);
 	}
 	
+    public static InputStream clone (final InputStream is) throws Exception {
+        return new ByteArrayInputStream (IOUtils.toByteArray (is));
+    }
+    
 }

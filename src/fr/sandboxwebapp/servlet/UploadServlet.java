@@ -9,8 +9,6 @@ import javax.servlet.http.HttpSession;
 import fr.sandboxwebapp.beans.User;
 import fr.sandboxwebapp.services.UploadService;
 import java.sql.Connection;
-import java.util.Arrays;
-import java.util.Map.Entry;
 
 public class UploadServlet extends RestrictedServlet {
 
