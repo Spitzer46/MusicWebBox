@@ -9,6 +9,8 @@ import javax.servlet.http.HttpSession;
 import fr.sandboxwebapp.beans.User;
 import fr.sandboxwebapp.services.UploadService;
 import java.sql.Connection;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class UploadServlet extends RestrictedServlet {
 
@@ -26,7 +28,8 @@ public class UploadServlet extends RestrictedServlet {
 		UploadService uploadService = new UploadService ((Connection) context.getAttribute ("con"));
 		uploadService.upload (req, (User) session.getAttribute ("userSession"));
 		if (uploadService.hasErrors ()) {
-			showListWarnings (uploadService.getErrors ());
+			for (Exception e : uploadService.getErrors ())
+				Logger.getLogger (UploadServlet.class.getName ()).log (Level.WARNING, null, e);
 		}
 	}
 	

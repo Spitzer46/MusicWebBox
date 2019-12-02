@@ -2,21 +2,24 @@ package fr.sandboxwebapp.servlet;
 
 import java.io.IOException;
 import java.sql.Connection;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
+import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
 import fr.sandboxwebapp.beans.User;
 import fr.sandboxwebapp.services.ConnectionService;
 
-public class LoginServlet extends Servlet {
+public class LoginServlet extends HttpServlet {
 
 	private static final long serialVersionUID = 2375996470246548054L;
+	private static final String ATTRIB_ERR_CON = "errorConnection";
 
 	@Override
 	protected void doGet (HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-		req.setAttribute ("errorConnection", false);
+		req.setAttribute (ATTRIB_ERR_CON, false);
 		req.getRequestDispatcher ("/WEB-INF/pages/public/entry.jsp").forward (req, resp);
 	}
 	
@@ -25,16 +28,16 @@ public class LoginServlet extends Servlet {
 		ServletContext context = this.getServletContext ();
 		ConnectionService conService = new ConnectionService ((Connection) context.getAttribute ("con"));
 		User user = conService.connecting (req);
-		HttpSession session = req.getSession ();
 		if (conService.hasErrors ()) {
-			req.setAttribute ("errorConnection", true);
+			req.setAttribute (ATTRIB_ERR_CON, true);
 			req.setAttribute ("errors", conService.getErrors ());
-			showListWarnings (conService.getErrors ());
+			for (Exception e : conService.getErrors ())
+				Logger.getLogger (LoginServlet.class.getName ()).log (Level.WARNING, null, e);
 			req.getRequestDispatcher ("/WEB-INF/pages/public/entry.jsp").forward (req, resp);
 		}
 		else {
-			req.setAttribute ("errorConnection", false);
-			session.setAttribute ("userSession", user);
+			req.setAttribute (ATTRIB_ERR_CON, false);
+			req.getSession ().setAttribute ("userSession", user);
 			resp.sendRedirect ("player");
 		}
 	}

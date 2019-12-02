@@ -72,14 +72,29 @@
 			    width: 15px;
 			    border-radius: 50%;
 			}
+			#tracksList {
+				position: relative;
+				height: 100%;
+				overflow: hidden;
+				overflow-y: scroll;
+				display: none;
+			}
+			#playlistTag {
+				position: relative;
+				width: 100%;
+				height: 100%;
+				display: flex;
+				justify-content: center;
+				align-items: center;
+			}
 		</style>
 	</head>
 	<body>  	
-	    <nav class="navbar navbar-light navbar-expand d-flex justify-content-between shadow-sm border-bottom" style="height:55px;background-color:#2a3439;">
+	    <nav class="navbar navbar-dark bg-dark navbar-expand d-flex justify-content-between shadow-sm border-bottom" style="height:55px;">
 	        <div class="container-fluid">
 	            <div class="collapse navbar-collapse d-flex justify-content-between" id="navcol-1" style="padding:10px;">
 	            	<button class="btn btn-dark" type="button" style="background-color:rgba(255,255,255,0);" onclick="window.location.href='upload'">Upload</button>
-	            	<button class="btn btn-dark" type="button" onclick="window.location.href='logout'">Log out</button>
+	            	<button class="btn btn-dark" type="button" onclick="window.location.href='logout'">Log out</button>					
 	            </div>
 	        </div>
 	    </nav>
@@ -88,8 +103,8 @@
 	            <div class="col-sm-10 col-lg-8 col-xl-6 offset-sm-1 offset-lg-2 offset-xl-3" style="padding:0px;">
 	                <div class="card rounded-lg" style="height:100%;width:100%;padding:0px;">
 	                    <div class="card-body rounded-lg" style="width:100%;height:50vh;background-color:#fff;padding:0;">
-	                    	<ul class="list-group list-group-flush" style="height:100%;overflow:hidden;overflow-y:scroll;" id="tracksList">
-							</ul>
+	                    	<div id="playlistTag">No track exist on your playlist</div>
+	                    	<ul class="list-group list-group-flush" id="tracksList"></ul>
 	                    </div>
 	                    <div class="card-footer" style="height:25vh;background-color:#2a3439;">
 	                    	<audio id="audioPlayerTag"></audio>
@@ -116,21 +131,13 @@
 	    </div>
   		<script>
  			"use strict";
-  			/*
-  			document.getElementById ("btnPlayStop").addEventListener ("click", e => {
-  				const fd = new FormData ();
-  				fd.append ("fistname", "Antoine");
-  				fd.append ("lasname", "PORTAL");
-  				fd.append ("age", 21);
-  				fd.append ("file", new File ([""], "e"));
-  				fetch ("test", { method: "POST", body: fd });
-  			});
-  			*/
+ 			
   			let startId = 999999999;
   			let mediaSource = null;
   			let currentLine = null;
   			const titleTrack = document.getElementById ("titleTrack");
   			const tracksList = document.getElementById ("tracksList");
+  			const playlitTag = document.getElementById ("playlistTag");
   			const audioPlayerTag = document.getElementById ("audioPlayerTag");
   			audioPlayerTag.addEventListener ("timeupdate", e => {
   				const elem = e.srcElement;
@@ -138,6 +145,10 @@
   				if (!isNaN (percent)) {
   					playerPanel.setSliderCursor (percent);
   				}
+  			});
+  			audioPlayerTag.addEventListener ("ended", () => {
+  				nextTrack (currentLine);
+  				console.log ("next track");
   			});
 
   			function post (url, data) {
@@ -202,22 +213,24 @@
   				}
   			}
   			
+  			function trackClick (elem) {
+				if (currentLine != null) {
+ 					currentLine.className = currentLine.className.replace (" bg-light shadow", "");
+ 					currentLine.style.zIndex = 0;
+ 				}
+ 				elem.className += " bg-light shadow";
+ 				elem.style.zIndex = 1000;
+ 				currentLine = elem;
+ 				titleTrack.innerHTML = elem.innerHTML;
+ 				startPlaying (parseInt (elem.id.match (/\d+$/) [0]));
+  			}
+  			
   			function createTrackLine (id, title) {
   				const elem = document.createElement ("li");
   				elem.id = "track#" + id;
   				elem.className = "d-block list-group-item list-group-item-action";
   				elem.innerHTML = title;
-  				elem.onclick = (e) => {
-  					if (currentLine != null) {
-  						currentLine.className = currentLine.className.replace (" bg-light shadow-sm", "");
-  						currentLine.style.zIndex = 0;
-  					}
-  					elem.className += " bg-light shadow-sm";
-  					elem.style.zIndex = 1000;
-  					currentLine = elem;
-  					titleTrack.innerHTML = title;
-  					startPlaying (parseInt (e.target.id.match (/\d+$/) [0]));
-  				}
+  				elem.onclick = () => trackClick (elem);
   				return elem;
   			} 
   			
@@ -233,10 +246,42 @@
 						tracksList.appendChild (elem);
 					}
 					startId = tracks.length ? tracks [tracks.length - 1].id : startId;
+					if (tracksList.childNodes.length) {
+						tracksList.style.display = "block";
+						playlitTag.style.display = "none";
+					}
+					else {
+						tracksList.style.display = "none";
+						playlitTag.style.display = "flex";
+					}
+					return tracks.length;
   				}
   				catch (err) {
   					console.error (err);
+  					return 0;
   				}
+  			}
+  			
+  			function previousTrack (elem) {
+  				const list = tracksList.childNodes;
+  				for (let i = 1; i < list.length; i++) {
+  					if (list [i] === elem) 
+  						return list [i - 1];
+  				}
+  				return null;
+  			}
+  			
+  			function nextTrack (elem) {
+  				const list = tracksList.childNodes;
+  				for (let i = 0; i < list.length; i++) {
+  					if (list [i] === elem) {
+  						if (i === list.length - 1) 
+  							if (loadTracks (10) === 0) 
+  								return null;
+						return list [i + 1];
+  					}
+  				}
+  				return null;
   			}
 
   			tracksList.addEventListener ("scroll", (e) => {
@@ -284,10 +329,22 @@
 					this.range.style.background = "linear-gradient(to right, #df7164 " + value + "%, #F5D0CC " + value + "%)";
 				},
 				previousTrackAction (e) {
-					console.log ("Previous track")
+					// console.log ("Previous track")
+					if (currentLine != null) {
+						const previous = previousTrack (currentLine);
+						// console.log (previous);
+						if (previous != null)
+							trackClick (previous);
+					}
 				},
 				nextTrackAction (e) {
-					console.log ("Next track");
+					// console.log ("Next track");
+					if (currentLine != null) {
+						const next = nextTrack (currentLine);
+						// console.log (next);
+						if (next != null)
+							trackClick (next);
+					}
 				}
 			}
   			

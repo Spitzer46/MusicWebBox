@@ -29,21 +29,19 @@ public class RestrictionFilter implements Filter {
         // filtering all other resource
         HttpSession session = request.getSession ();
         if (session.getAttribute ("userSession") == null) {
-        	LOG.info ("Public access : " + localPath);
-        	request.getRequestDispatcher (localPath).forward (req, resp);
+          	LOG.info ("Public access : " + localPath);
+          	request.getRequestDispatcher (localPath).forward (req, resp);
         }
         else {
-        	LOG.info ("Private access : " + localPath);
-        	chain.doFilter (req, resp);
+          	LOG.info ("Private access : " + localPath);
+          	chain.doFilter (req, resp);
         }
+        // chain.doFilter (req, resp);
 	}
 
 	@Override
 	public void init (FilterConfig conf) {
 		LOG = Logger.getLogger (this.getClass ().getName ());
 	}
-	
-	@Override
-	public void destroy () {}
 	
 }

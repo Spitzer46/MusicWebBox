@@ -23,78 +23,65 @@ public class Track {
 	
 	public Track () {}
 	
-	public static void save (Connection con, Track track, User user) throws SQLException {
-		String query = "SELECT id FROM users WHERE username = ?";
-		PreparedStatement stmt = con.prepareStatement (query);
-		stmt.setString (1, user.getUsername ());
-		ResultSet results = stmt.executeQuery ();
-		if (results.next ()) {
-			query = "INSERT INTO tracks (userId, track, title, lastUpdate, type, duration) ";
-			query += "VALUES (?, ?, ?, NOW(), ?, ?) ON DUPLICATE KEY UPDATE ";
-			query += "track = VALUES(track), ";
-			query += "lastUpdate = VALUES(lastUpdate), ";
-			query += "type = VALUES(type), ";
-			query += "duration = VALUES(duration)";
-			stmt = con.prepareStatement (query);
-			stmt.setInt (1, results.getInt ("id"));
+	public static void save (Connection con, Track track, User user) throws Exception {
+		final int userId = User.getIdByUsername (con, user.getUsername ());
+		String query = "INSERT INTO tracks (userId, track, title, lastUpdate, type, duration) ";
+		query += "VALUES (?, ?, ?, NOW(), ?, ?) ON DUPLICATE KEY UPDATE ";
+		query += "track = VALUES(track), ";
+		query += "lastUpdate = VALUES(lastUpdate), ";
+		query += "type = VALUES(type), ";
+		query += "duration = VALUES(duration)";
+		try (PreparedStatement stmt = con.prepareStatement (query)) {
+			stmt.setInt (1, userId);
 			stmt.setBlob (2, track.getDataIn ());
 			stmt.setString (3, track.getTitle ());
 			stmt.setString (4, track.getType ());
 			stmt.setFloat (5, track.getDuration ());
 			stmt.execute ();
 		}
-		results.close ();
-		stmt.close ();
 	}
 	
-	public static List<Track> getNextTraks (Connection con, User user, final int start, final int limit) throws SQLException {
+	public static List<Track> getNextTraks (Connection con, User user, final int start, final int limit) throws Exception {
+		final int userId = User.getIdByUsername (con, user.getUsername ());
 		List<Track> tracks = new ArrayList<>();
-		String query = "SELECT id FROM users WHERE username = ?";
-		PreparedStatement stmt = con.prepareStatement (query);
-		stmt.setString (1, user.getUsername ());
-		ResultSet results = stmt.executeQuery ();
-		if (results.next ()) {
-			query = "SELECT id, title FROM tracks WHERE userId = ? AND id < ? ORDER BY lastUpdate DESC LIMIT ?";
-			stmt = con.prepareStatement (query);
-			final int userId = results.getInt ("id");
+		String query = "SELECT id, title FROM tracks WHERE userId = ? AND id < ? ORDER BY lastUpdate DESC LIMIT ?";
+		try (PreparedStatement stmt = con.prepareStatement (query)) {
 			stmt.setInt (1, userId);
 			stmt.setInt(2, start);
 			stmt.setInt(3, limit);
-			results.close ();
-			results = stmt.executeQuery ();
-			while (results.next ()) {
-				Track track = new Track ();
-				track.setId (results.getInt ("id"));
-				track.setUserId (userId);
-				track.setDataIn (null);
-				track.setTitle (results.getString ("title"));
-				track.setType (null);
-				track.setDuration (0.0f);
-				tracks.add (track);
+			try (ResultSet results = stmt.executeQuery ()) {
+				while (results.next ()) {
+					Track track = new Track ();
+					track.setId (results.getInt ("id"));
+					track.setUserId (userId);
+					track.setDataIn (null);
+					track.setTitle (results.getString ("title"));
+					track.setType (null);
+					track.setDuration (0.0f);
+					tracks.add (track);
+				}
 			}
 		}
-		results.close ();
-		stmt.close ();
 		return tracks;
 	}
 	
 	public static Track getTrack (Connection con, final int id) throws SQLException {
 		String query = "SELECT * FROM tracks WHERE id = ?";
-		PreparedStatement stmt = con.prepareStatement (query);
-		stmt.setInt (1, id);
-		ResultSet result = stmt.executeQuery ();
-		if (result.next ()) {
-			Track track = new Track ();
-			track.setId (id);
-			track.setUserId (result.getInt ("userId"));
-			track.setDataIn (result.getBinaryStream ("track"));
-			track.setTitle (result.getString ("title"));
-			track.setType (result.getString ("type"));
-			track.setDuration (result.getFloat ("duration"));
-			return track;
+		try (PreparedStatement stmt = con.prepareStatement (query)) {
+			stmt.setInt (1, id);
+			try (ResultSet result = stmt.executeQuery ()) {
+				if (result.next ()) {
+					Track track = new Track ();
+					track.setId (id);
+					track.setUserId (result.getInt ("userId"));
+					track.setDataIn (result.getBinaryStream ("track"));
+					track.setTitle (result.getString ("title"));
+					track.setType (result.getString ("type"));
+					track.setDuration (result.getFloat ("duration"));
+					return track;
+				}
+			}
 		}
-		result.close ();
-		stmt.close ();
 		return null;
 	}
 	
@@ -110,6 +97,7 @@ public class Track {
 		return buffer;
 	}
 	
+	@SuppressWarnings("unchecked")
 	public JSONObject toJSON () {
 		JSONObject json = new JSONObject ();
 		json.put ("id", id);

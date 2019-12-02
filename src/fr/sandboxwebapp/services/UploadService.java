@@ -45,7 +45,7 @@ public class UploadService extends Service {
 	}
 	
 	private String getTrackTitle (String fullName) {
-		final int liod = fullName.lastIndexOf (".");
+		final int liod = fullName.lastIndexOf ('.');
 		if (liod == -1) {
 			return fullName;
 		}

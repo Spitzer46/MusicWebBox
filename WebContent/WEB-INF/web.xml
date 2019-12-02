@@ -1,6 +1,58 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <web-app xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://xmlns.jcp.org/xml/ns/javaee" xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee http://xmlns.jcp.org/xml/ns/javaee/web-app_4_0.xsd" id="WebApp_ID" version="4.0">
 	<display-name>SandboxWebApp</display-name>
+	<!-- parametre base de donnée -->
+	<context-param>
+		<param-name>db_url</param-name>
+		<param-value>jdbc:mariadb://127.0.0.1:3306/sandboxwebapp</param-value>
+	</context-param>
+	<context-param>
+		<param-name>db_user</param-name>
+		<param-value>root</param-value>
+	</context-param>
+	<context-param>
+		<param-name>db_password</param-name>
+		<param-value>root</param-value>
+	</context-param>
+	<context-param>
+		<param-name>db_autoReconnect</param-name>
+		<param-value>true</param-value>
+	</context-param>
+	<context-param>
+		<param-name>db_driver</param-name>
+		<param-value>org.mariadb.jdbc.Driver</param-value>
+	</context-param>
+	<!-- email -->
+	<context-param>
+		<param-name>email_sender_account</param-name>
+		<param-value>antoineportal1602@gmail.com</param-value>
+	</context-param>
+	<context-param>
+		<param-name>email_sender_account_password</param-name>
+		<param-value>Dap455256</param-value>
+	</context-param>
+	<!-- email stmp -->
+	<context-param>
+		<param-name>mail.smtp.host</param-name>
+		<param-value>smtp.gmail.com</param-value>
+	</context-param>
+	<context-param>
+		<param-name>mail.smtp.port</param-name>
+		<param-value>465</param-value>
+	</context-param>
+	<context-param>
+		<param-name>mail.smtp.auth</param-name>
+		<param-value>true</param-value>
+	</context-param>
+	<context-param>
+		<param-name>mail.smtp.socketFactory.port</param-name>
+		<param-value>465</param-value>
+	</context-param>
+	<context-param>
+		<param-name>mail.smtp.socketFactory.class</param-name>
+		<param-value>javax.net.ssl.SSLSocketFactory</param-value>
+	</context-param>
+	<!-- filtre d'encodage -->
  	<filter>
     	<filter-name>Set Character Encoding</filter-name>
     	<filter-class>org.apache.catalina.filters.SetCharacterEncodingFilter</filter-class>
@@ -17,11 +69,6 @@
     	<filter-name>Set Character Encoding</filter-name>
     	<url-pattern>/*</url-pattern>
   	</filter-mapping>
-  	<listener>
-  		<listener-class>
-  		fr.sandboxwebapp.context.WebappContextListener
-  		</listener-class>
-  	</listener> 
   
   	<servlet>
   		<servlet-name>Login</servlet-name>
@@ -67,21 +114,48 @@
   		<servlet-name>LogoutServlet</servlet-name>
   		<url-pattern>/logout</url-pattern>
   	</servlet-mapping>
-  
+  	
+  	<servlet>
+  		<servlet-name>EmailServlet</servlet-name>
+  		<servlet-class>fr.sandboxwebapp.servlet.EmailServlet</servlet-class>
+  	</servlet>
+  	<servlet-mapping>
+  		<servlet-name>EmailServlet</servlet-name>
+  		<url-pattern>/email/*</url-pattern>
+  	</servlet-mapping>
+  	
+	<servlet>
+  		<servlet-name>RecoverPassword</servlet-name>
+  		<servlet-class>fr.sandboxwebapp.servlet.RecoverPassword</servlet-class>
+  	</servlet>
+  	<servlet-mapping>
+  		<servlet-name>RecoverPassword</servlet-name>
+  		<url-pattern>/recoverpassword</url-pattern>
+  	</servlet-mapping>
+  	
+  	<servlet>
+  		<servlet-name>SetupPassword</servlet-name>
+  		<servlet-class>fr.sandboxwebapp.servlet.SetupPasswordServlet</servlet-class>
+  	</servlet>
+  	<servlet-mapping>
+  		<servlet-name>SetupPassword</servlet-name>
+  		<url-pattern>/setuppassword</url-pattern>
+  	</servlet-mapping>
+  	<!-- 
   	<servlet>
   		<servlet-name>test</servlet-name>
   		<servlet-class>fr.sandboxwebapp.servlet.Test</servlet-class>
   		<multipart-config>
-  			<max-file-size>10485760</max-file-size> <!-- 10 Mo -->
-			<max-request-size>52428800</max-request-size> <!-- 5 x 10 Mo -->
-			<file-size-threshold>1048576</file-size-threshold> <!-- 1 Mo -->
+  			<max-file-size>10485760</max-file-size>
+			<max-request-size>52428800</max-request-size> 
+			<file-size-threshold>1048576</file-size-threshold> 
   		</multipart-config>
   	</servlet>
   	<servlet-mapping>
   		<servlet-name>test</servlet-name>
   		<url-pattern>/test</url-pattern>
   	</servlet-mapping>
-  
+  	-->
   	<filter>
   		<filter-name>Restriction</filter-name>
   		<filter-class>fr.sandboxwebapp.filter.RestrictionFilter</filter-class>

@@ -2,21 +2,24 @@ package fr.sandboxwebapp.servlet;
 
 import java.io.IOException;
 import java.sql.Connection;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
+import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
 import fr.sandboxwebapp.beans.User;
 import fr.sandboxwebapp.services.ConnectionService;
 
-public class SigninServlet extends Servlet {
+public class SigninServlet extends HttpServlet {
 
 	private static final long serialVersionUID = 70478938643965922L;
-
+	private static final String ATTRIB_SIGN_IN_ERR = "errorSignIn";
+	
 	@Override
 	protected void doGet (HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-		req.setAttribute ("errorSignIn", false);
+		req.setAttribute (ATTRIB_SIGN_IN_ERR, false);
 		req.getRequestDispatcher ("/WEB-INF/pages/public/signin.jsp").forward (req, resp);
 	}
 	
@@ -24,18 +27,19 @@ public class SigninServlet extends Servlet {
 	protected void doPost (HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 		ServletContext context = this.getServletContext ();
 		ConnectionService conService = new ConnectionService ((Connection) context.getAttribute ("con"));
-		User user = conService.create (req);
-		HttpSession session = req.getSession ();
+		User user = conService.create (req, context);
 		if (conService.hasErrors ()) {
-			req.setAttribute ("errorSignIn", true);
+			req.setAttribute (ATTRIB_SIGN_IN_ERR, true);
 			req.setAttribute ("errors", conService.getErrors ());
-			showListWarnings (conService.getErrors ());
+			for (Exception e : conService.getErrors ())
+				Logger.getLogger (SigninServlet.class.getName ()).log (Level.WARNING, null, e);
 			req.getRequestDispatcher ("/WEB-INF/pages/public/signin.jsp").forward (req, resp);
 		}
 		else {
-			req.setAttribute ("errorSignIn", false);
-			session.setAttribute ("userSession", user);
-			req.getRequestDispatcher ("/WEB-INF/pages/restreint/home.jsp").forward (req, resp);
+			req.setAttribute (ATTRIB_SIGN_IN_ERR, false);
+			req.getSession ().setAttribute ("userSession", user);
+			// req.getRequestDispatcher ("/WEB-INF/pages/restreint/home.jsp").forward (req, resp);
+			req.getRequestDispatcher ("/WEB-INF/pages/public/email.jsp").forward (req, resp);
 		}
 	}
 	

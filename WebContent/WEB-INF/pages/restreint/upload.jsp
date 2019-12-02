@@ -29,6 +29,18 @@
 			*::-webkit-scrollbar-thumb:hover {
 				background: #43535b;
 			}
+			#dropdragTag {
+				position: relative;
+				width: 100%;
+				height: 100%;
+				display: flex;
+				justify-content: center;
+				align-items: center;
+			}
+			#dropzoneBox {
+				position: relative;
+				background: #fff;
+			}
   		</style>
 	</head>
 	<body>
@@ -47,7 +59,8 @@
 	                    <div class="card-header" style="height:8vh;"></div>
 	                    <div class="card-body d-flex justify-content-center align-items-center rounded-lg" style="max-width:100%;height:70vh;padding:0;background-color:#fff;">
                  			<div class="table-wrapper-scroll-y my-custom-scrollbar table-hover" id="dropbox">
-								<table class="table mb-0">
+								<div id="dropdragTag">Drag and drop your tracks</div>
+								<table class="table mb-0" di="dropzoneBox">
 				    				<tbody id="dropboxBody"></tbody>
 			  					</table>
 							</div>
@@ -75,6 +88,7 @@
   				const progressBar = document.getElementById ("progressBar");
   				const progressBarContainer = document.getElementById ("progressBarContainer");
   				progressBarContainer.style.visibility = "hidden";
+  				const dropdragTag = document.getElementById ("dropdragTag");
   				
   				dropbox.addEventListener("dragenter", e => {
   					e.stopPropagation ();
@@ -134,6 +148,7 @@
   				    		updateDisplay ();
   				    	}
   				    }
+  				    dropdragTag.style.display = listOfTracks.length ? "none" : "flex";
   				}
   				
   			    function uploadFile (track) {

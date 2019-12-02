@@ -13,21 +13,17 @@
 	   	</nav>
 		<div class="container d-flex justify-content-center align-items-center vh-100">
 			<div class="col-sm-12 col-lg-6 col-xs-4">
-				<h3>Connexion</h3>
-				<form method="post" action="login">
-					<div class="form-group">
-						<label for="pseudo">Pseudo</label>
-						<input type="text" class="form-control" name="username" id="pseudoElem">
-					</div>
+				<h3>Modifier mon mot de passe</h3>
+				<form method="post" action="setuppassword?id=<% out.print ((String) request.getParameter ("id")); %>">
 					<div class="form-group">
 						<label for="password">Mot de passe</label>
 						<input type="password" class="form-control" name="password" id="passwordElem">
 					</div>
 					<div class="form-group">
-						<a class="text-body" href="recoverpassword">Mot de passe oublié</a>
+						<label for="confirmation">Confirmation</label>
+						<input type="password" class="form-control" name="confirmation" id="confirmationElem">
 					</div>
-					<input type="submit" class="btn btn-primary" value="Connexion">
-					<input type="button" class="btn btn-success" onclick="window.location.href='sign_in'" value="Inscription">
+					<input type="submit" class="btn btn-primary" value="Valider">
 				</form>
 				<br>
 				<% if ((boolean) request.getAttribute ("errorConnection")) {

@@ -6,7 +6,8 @@ import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import fr.sandboxwebapp.beans.User;
 import fr.sandboxwebapp.services.AudioPlayerService;
 
@@ -23,10 +24,10 @@ public class AudioPlayerServlet extends RestrictedServlet {
 	protected void doPost (HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 		// Audio Player API
 		ServletContext context = this.getServletContext ();
-		HttpSession session = req.getSession ();
-		User user = (User) session.getAttribute ("userSession");
-		String uri = req.getRequestURI ();
+		User user = (User) req.getSession ().getAttribute ("userSession");
 		AudioPlayerService audioPlayerService = new AudioPlayerService ((Connection) context.getAttribute ("con"));
+		
+		String uri = req.getRequestURI ();
 		if (uri.equals ("/SandboxWebApp/player/api/nexttracks")) {
 			audioPlayerService.nextTrack (req, resp, user);
 		}
@@ -34,14 +35,16 @@ public class AudioPlayerServlet extends RestrictedServlet {
 			audioPlayerService.loadTrack (req, resp, user);
 		}
 		else if (uri.equals ("/SandboxWebApp/player/api/readChunk")) {
-			audioPlayerService.loadChunk (req, resp, user);
+			audioPlayerService.loadChunk (resp, user);
 		}
 		else {
-			LOG.warn ("Url not found");
+			Logger.getLogger (AudioPlayerServlet.class.getName ()).log (Level.WARNING, "Url not found");
 		}
 		// handler errors
 		if (audioPlayerService.hasErrors ()) {
-			showListWarnings (audioPlayerService.getErrors ());
+			for (Exception e : audioPlayerService.getErrors ()) {
+				Logger.getLogger (AudioPlayerServlet.class.getName ()).log (Level.WARNING,  null, e);
+			}
 		}
 	}
 	

@@ -16,6 +16,7 @@ public class AudioPlayerService extends Service {
 		super (con);
 	}
 	
+	@SuppressWarnings("unchecked")
 	public void nextTrack (HttpServletRequest req, HttpServletResponse resp, User user) {
 		try (ServletOutputStream sos = resp.getOutputStream ()) {
 			final int startId = Integer.parseInt ((String) req.getParameter ("start"));
@@ -38,6 +39,7 @@ public class AudioPlayerService extends Service {
 		}
 	}
 	
+	@SuppressWarnings("unchecked")
 	public void loadTrack (HttpServletRequest req, HttpServletResponse resp, User user) {
 		try (ServletOutputStream sos = resp.getOutputStream ()) {
 			final int trackId = Integer.parseInt ((String) req.getParameter ("id"));
@@ -48,7 +50,6 @@ public class AudioPlayerService extends Service {
 			user.setLastTrack (lastTrack);
 			JSONObject infos = new JSONObject ();
 			infos.put ("duration", lastTrack.getDuration ());
-			// infos.put ("size", lastTrack.getDataIn ().available ());
 			sos.print (infos.toJSONString ());
 		}
 		catch (Exception e) {
@@ -56,7 +57,7 @@ public class AudioPlayerService extends Service {
 		}
 	}
 	
-	public void loadChunk (HttpServletRequest req, HttpServletResponse resp, User user) {
+	public void loadChunk (HttpServletResponse resp, User user) {
 		try (ServletOutputStream sos = resp.getOutputStream ()) {
 			Track track = user.getLastTrack ();
 			byte [] chunk = track.getNextChunk ();

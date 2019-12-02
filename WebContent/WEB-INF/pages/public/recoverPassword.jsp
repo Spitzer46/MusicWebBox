@@ -12,23 +12,27 @@
 		<nav class="navbar navbar-dark fixed-top bg-dark navbar-expand shadow-sm border-bottom" style="height:55px;">
 	   	</nav>
 		<div class="container d-flex justify-content-center align-items-center vh-100">
-			<div class="col-sm-12 col-lg-6 col-xs-4">
-				<h3>Connexion</h3>
-				<form method="post" action="login">
+			<div class="col-sm-12 col-lg-6 col-xs-4 vh-75">
+				<br>
+				<h2>Mot de passe oublié</h2>
+				<form method="post" action="recoverpassword">
 					<div class="form-group">
 						<label for="pseudo">Pseudo</label>
 						<input type="text" class="form-control" name="username" id="pseudoElem">
 					</div>
 					<div class="form-group">
-						<label for="password">Mot de passe</label>
-						<input type="password" class="form-control" name="password" id="passwordElem">
+						<label for="password">Email</label>
+						<input type="email" class="form-control" name="email" id="emailElem">
 					</div>
-					<div class="form-group">
-						<a class="text-body" href="recoverpassword">Mot de passe oublié</a>
-					</div>
-					<input type="submit" class="btn btn-primary" value="Connexion">
-					<input type="button" class="btn btn-success" onclick="window.location.href='sign_in'" value="Inscription">
+					<input type="submit" class="btn btn-primary" value="Recuperation">
 				</form>
+				<br>
+				<% if ((boolean) request.getAttribute ("hasMessages")) {
+				      for (String msg : (List<String>) request.getAttribute ("messages")) {
+				    	  out.println (String.format ("<p class=\"text-secondary\">%s</p>", msg));
+				      }
+				   }
+				%>
 				<br>
 				<% if ((boolean) request.getAttribute ("errorConnection")) {
 				      for (Exception e : (List<Exception>) request.getAttribute ("errors")) {
