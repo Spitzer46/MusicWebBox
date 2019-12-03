@@ -147,8 +147,9 @@
   				}
   			});
   			audioPlayerTag.addEventListener ("ended", () => {
-  				nextTrack (currentLine);
-  				console.log ("next track");
+  				const next = nextTrack (currentLine);
+  				if (next)
+  					trackClick (next);
   			});
 
   			function post (url, data) {

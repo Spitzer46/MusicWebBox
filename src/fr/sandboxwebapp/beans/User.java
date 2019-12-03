@@ -121,8 +121,8 @@ public class User {
 	}
 	
 	public static void setEnabledByTokenUrl (Connection con, boolean enabled, String tokenUrl) throws SQLException {
-		String query = "UPDATE users SET enabled = ? \n";
-		query += "WHERE username = (SELECT username FROM tokenurltable WHERE tokenUrl = ?)";
+		String query = "UPDATE users u SET enabled = ? \n";
+		query += "WHERE u.username = (SELECT username FROM tokenurltable t WHERE t.tokenUrl = ?)";
 		try (PreparedStatement stmt = con.prepareStatement (query)) {
 			stmt.setBoolean (1, enabled);
 			stmt.setString (2, tokenUrl);
